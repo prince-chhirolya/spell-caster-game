@@ -1,0 +1,682 @@
+@import url("https://fonts.googleapis.com/css2?family=Henny+Penny&family=Tinos:wght@400;700&display=swap");
+:root {
+  --font-body: "Tinos", serif;
+  --font-heading: "Henny Penny", cursive;
+  --font-weight-body: 400;
+  --font-weight-bold: 700;
+  --font-weight-heading: 400;
+  --color-black: black;
+  --color-black-alpha: rgba(0, 0, 0, 0.7);
+  --color-white: white;
+  --color-grey: #767474;
+  --color-grey-dark: #3e3e3e;
+  --color-crystal: #d54adf;
+  --color-crystal-light: #d68ddc;
+}
+
+html,
+body,
+.app {
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-body);
+}
+
+body {
+  font-size: clamp(20px, 4vmin, 26px);
+  line-height: 110%;
+}
+
+.app {
+  background-color: var(--color-black);
+  color: #f9f9f9;
+}
+.app h1,
+.app h2,
+.app h3,
+.app h4,
+.app h5,
+.app h6 {
+  font-family: var(--font-heading);
+  font-weight: var(--font-weight-heading);
+  margin: 0;
+}
+.app h1 {
+  font-size: clamp(30px, 14vmin, 130px);
+}
+.app h2 {
+  font-size: clamp(30px, 11vmin, 100px);
+}
+.app h3 {
+  font-size: clamp(24px, 6.5vmin, 60px);
+}
+.app h4 {
+  font-size: clamp(20px, 4vmin, 40px);
+}
+.app a,
+.app a:visited {
+  color: var(--color-crystal-light);
+  pointer-events: all;
+}
+.app a:hover,
+.app a:visited:hover {
+  color: var(--color-crystal);
+}
+
+.top-bar {
+  position: absolute;
+  top: 1em;
+  left: 1em;
+  right: 1em;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 80%;
+  pointer-events: none;
+}
+.top-bar .left,
+.top-bar .right {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
+.top-bar .left {
+  gap: 1em;
+}
+.top-bar .left > * {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  display: none;
+}
+.top-bar button {
+  --size: 40px;
+  --border-color: var(--color-grey);
+  display: none;
+  width: var(--size);
+  height: var(--size);
+  background-color: var(--color-black-alpha);
+  border: solid 2px var(--border-color);
+  border-radius: 40px;
+  cursor: pointer;
+  position: relative;
+  align-items: center;
+  justify-content: center;
+  pointer-events: all;
+}
+.top-bar button svg {
+  transition: transform 0.2s ease-in-out;
+}
+.top-bar button.show-unless {
+  display: flex;
+}
+.top-bar button[data-off] svg {
+  transform: scale(0.8);
+}
+.top-bar button[data-off]::after {
+  content: "";
+  width: 100%;
+  height: 2px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  background-color: var(--border-color);
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+.top-bar button:hover, .top-bar button:active {
+  --border-color: var(--color-crystal);
+}
+
+.count {
+  font-variant-numeric: tabular-nums;
+}
+
+.health-bar {
+  width: 260px;
+  height: 20px;
+  border: 2px solid var(--color-grey);
+  background-color: var(--color-black-alpha);
+  overflow: hidden;
+  position: relative;
+}
+.health-bar::after {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  background-color: var(--color-crystal);
+  transform-origin: left center;
+  transform: scaleX(calc(1 * var(--health)));
+}
+
+.canvas,
+.overlay,
+.screens {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  max-height: 100vw;
+  max-width: 2000px;
+  transform: translate(-50%, -50%);
+}
+
+.screens {
+  pointer-events: none;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+.screens > * {
+  --pad: 5vmin;
+  position: absolute;
+  inset: var(--pad);
+  display: grid;
+  align-items: stretch;
+  justify-items: stretch;
+  justify-content: center;
+  display: none;
+}
+.screens > *::after {
+  grid-area: space;
+}
+.screens .spells {
+  inset: unset;
+  bottom: 3vmin;
+  right: 3vmin;
+  z-index: 10;
+  max-width: 46%;
+  display: none;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 1fr;
+  gap: 1.5rem;
+  justify-content: center;
+  align-items: center;
+  padding: 0.5rem 1.5rem;
+}
+.screens .spells .spell-path {
+  width: 50px;
+  position: relative;
+}
+.screens .spells .spell-path .check {
+  opacity: 0;
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translate(-50%, 0%);
+  transition-property: opacity, transform;
+  transition-duration: 0.4s;
+  transition-timing-function: cubic-bezier(0.52, -0.47, 0.37, 1);
+}
+.screens .spells .spell-path svg {
+  width: 100%;
+  fill: none;
+}
+.screens .spells .info {
+  display: none;
+  flex-direction: column;
+}
+.screens .spells .info h4 {
+  margin-bottom: 1rem;
+}
+.screens .spells .info p {
+  font-size: 20px;
+}
+.screens .spells .charge-path {
+  stroke-width: 6;
+  stroke-dasharray: var(--length) var(--length);
+  stroke-dashoffset: calc(((1 - var(--charge))) * var(--length));
+}
+.screens .spells .guide-path {
+  stroke: rgba(255, 255, 255, 0.2);
+}
+.screens .spells .spell-details {
+  display: flex;
+  flex-direction: row;
+  gap: 3rem;
+  align-items: center;
+  z-index: 2;
+}
+.screens .spells .background {
+  position: absolute;
+  inset: 0;
+  border: solid 2px var(--color-grey);
+  background-color: var(--color-black-alpha);
+}
+.screens .spells.corner {
+  cursor: pointer;
+  pointer-events: all;
+  display: grid;
+}
+.screens .spells.corner .spell-path.ready .check {
+  opacity: 1;
+  transform: translate(-50%, -200%);
+}
+.screens .spells.corner:hover .background {
+  border-color: var(--color-crystal);
+}
+.screens .spells.full {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr 1fr 1fr;
+  bottom: 50%;
+  gap: 2rem;
+  transform: translateY(50%);
+  padding: 2rem 3rem;
+}
+.screens .spells.full .spell-path {
+  width: 160px;
+}
+.screens .spells.full .spell-path .check {
+  transition: none;
+}
+.screens .spells.full .spell-path svg {
+  --charge: 1 !important;
+}
+.screens .spells.full .info {
+  display: flex;
+}
+.screens .content {
+  text-align: center;
+  grid-area: content;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+.screens .content > *:not(:last-child) {
+  margin-bottom: clamp(20px, 5vmin, 50px);
+}
+.screens .button-row {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: row;
+  gap: 0.7em;
+}
+.screens button {
+  --border-color: var(--color-grey);
+  color: var(--color-white);
+  pointer-events: all;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-body);
+}
+.screens button:not(.simple, .no-style) {
+  background-color: var(--color-black-alpha);
+  border: 2px solid var(--border-color);
+  font-size: 30px;
+  padding: 0.2em 1.4em;
+}
+.screens button.simple {
+  background-color: transparent;
+  border: none;
+  text-decoration: underline;
+  -webkit-text-decoration-color: var(--border-color);
+          text-decoration-color: var(--border-color);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 5px;
+  font-size: 20px;
+}
+.screens button:hover, .screens button:active {
+  --border-color: var(--color-crystal);
+}
+.screens p {
+  max-width: 600px;
+  margin: 0;
+}
+
+.loading-bar {
+  width: 260px;
+  height: 2px;
+  background-color: var(--color-grey-dark);
+  overflow: hidden;
+  position: relative;
+}
+.loading-bar::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background-color: var(--color-crystal);
+  transform-origin: left center;
+  transform: scaleX(calc(1 * var(--loaded)));
+}
+
+[data-state=IDLE] #sounds-button,
+[data-state=INIT] #sounds-button {
+  display: none;
+}
+
+[data-state=INIT] #sounds-button {
+  display: none;
+}
+
+[data-state=LOADING] [data-screen=LOADING] {
+  display: grid;
+  grid-template-columns: 0px 1fr;
+  grid-template-areas: "space content";
+}
+[data-state=LOADING] #sounds-button {
+  display: none;
+}
+
+[data-state=LOAD_ERROR] #sounds-button {
+  display: none;
+}
+
+[data-state=TITLE_SCREEN] [data-screen=TITLE_SCREEN] {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas: "space content";
+}
+[data-state=TITLE_SCREEN] [data-screen=TITLE_SCREEN] h1 {
+  line-height: 1.2em;
+}
+
+[data-state=CREDITS] [data-screen=CREDITS] {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  grid-template-areas: "content space";
+}
+[data-state=CREDITS] [data-screen=CREDITS] h3,
+[data-state=CREDITS] [data-screen=CREDITS] .content {
+  width: auto;
+  text-align: left;
+}
+[data-state=CREDITS] [data-screen=CREDITS] li {
+  margin-bottom: 1rem;
+}
+
+[data-state=INSTRUCTIONS_CRYSTAL] [data-screen=INSTRUCTIONS_CRYSTAL] {
+  display: grid;
+  grid-template-rows: 1fr 1.2fr;
+  grid-template-areas: "space" "content";
+}
+
+[data-state=INSTRUCTIONS_DEMON] [data-screen=INSTRUCTIONS_DEMON] {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  grid-template-areas: "content space";
+}
+[data-state=INSTRUCTIONS_DEMON] [data-screen=INSTRUCTIONS_DEMON] .content {
+  justify-content: flex-end;
+}
+
+[data-state=INSTRUCTIONS_CAST] [data-screen=INSTRUCTIONS_CAST] {
+  display: grid;
+  grid-template-columns: 0px 1fr;
+  grid-template-areas: "space content";
+}
+
+#spell-guide {
+  width: 70%;
+  max-width: 400px;
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+}
+#spell-guide.show {
+  opacity: 0.5;
+}
+
+[data-state=INSTRUCTIONS_SPELLS] [data-screen=INSTRUCTIONS_SPELLS] {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  grid-template-areas: "content space";
+}
+
+[data-state=GAME_RUNNING] #health-bar,
+[data-state=SPECIAL_SPELL] #health-bar {
+  display: flex;
+}
+[data-state=GAME_RUNNING] #demon-state,
+[data-state=SPECIAL_SPELL] #demon-state {
+  display: flex;
+}
+[data-state=GAME_RUNNING] #pause-button,
+[data-state=SPECIAL_SPELL] #pause-button {
+  display: flex;
+}
+
+[data-state=ENDLESS_MODE] #endless-mode,
+[data-state=ENDLESS_SPECIAL_SPELL] #endless-mode {
+  display: flex;
+}
+[data-state=ENDLESS_MODE] #close-button,
+[data-state=ENDLESS_SPECIAL_SPELL] #close-button {
+  display: flex;
+}
+[data-state=ENDLESS_MODE] #pause-button,
+[data-state=ENDLESS_SPECIAL_SPELL] #pause-button {
+  display: flex;
+}
+
+[data-state=ENDLESS_SPELL_OVERLAY] #endless-mode {
+  display: flex;
+}
+
+[data-state=PAUSED] [data-screen=PAUSED],
+[data-state=ENDLESS_PAUSE] [data-screen=PAUSED] {
+  display: grid;
+  grid-template-rows: 2fr 1fr;
+  grid-template-areas: "space" "content";
+}
+[data-state=PAUSED] [data-screen=PAUSED] .content,
+[data-state=ENDLESS_PAUSE] [data-screen=PAUSED] .content {
+  justify-content: flex-end;
+}
+[data-state=PAUSED] #paused,
+[data-state=ENDLESS_PAUSE] #paused {
+  display: flex;
+}
+[data-state=PAUSED] #pause-button,
+[data-state=ENDLESS_PAUSE] #pause-button {
+  display: flex;
+}
+
+[data-state=ENDLESS_PAUSE] #close-button,
+[data-state=CREDITS] #close-button {
+  display: flex;
+}
+
+[data-state=SPELL_OVERLAY] [data-screen=SPELL_OVERLAY],
+[data-state=ENDLESS_SPELL_OVERLAY] [data-screen=SPELL_OVERLAY] {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  grid-template-areas: "content space";
+}
+
+[data-state=SPELL_OVERLAY] #health-bar {
+  display: flex;
+}
+[data-state=SPELL_OVERLAY] #demon-state {
+  display: flex;
+}
+
+[data-state=GAME_OVER] [data-screen=GAME_OVER] {
+  display: grid;
+  grid-template-columns: 0px 1fr;
+  grid-template-areas: "space content";
+}
+[data-state=GAME_OVER] [data-screen=GAME_OVER] .content {
+  justify-content: flex-end;
+}
+
+[data-state=WINNER] [data-screen=WINNER] {
+  display: grid;
+  grid-template-columns: 0px 1fr;
+  grid-template-areas: "space content";
+}
+[data-state=WINNER] [data-screen=WINNER] .content {
+  justify-content: flex-end;
+}
+
+.charging-notification {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  background-color: rgba(0, 0, 0, 0.7);
+  border: solid 1px red;
+  padding: 0.5em 1em;
+  transform: translate(-50%, 0%);
+  color: #ff7070;
+  pointer-events: none;
+  opacity: 0;
+  transition-property: opacity, transform;
+  transition-duration: 0.3s;
+  transition-timing-function: ease-in-out;
+}
+.charging-notification p {
+  padding: 0;
+  margin: 0;
+}
+.charging-notification.show {
+  opacity: 1;
+  transform: translate(-50%, -50%);
+}
+
+.debug-panels {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  color: white;
+  padding: 10px;
+  gap: 10px;
+  z-index: 100;
+  pointer-events: none;
+}
+
+.panel {
+  border: 1px solid white;
+  padding: 10px;
+  max-width: 250px;
+  width: 250px;
+}
+.panel p {
+  margin: 0;
+  padding: 0;
+}
+.panel button {
+  border: 0;
+  background-color: #f9f9f9;
+  color: #444;
+  font-size: 1em;
+  padding: 6px 10px;
+  cursor: pointer;
+  pointer-events: all;
+}
+.panel > div {
+  position: relative !important;
+}
+
+#spell-path {
+  stroke: red;
+  stroke-width: 2;
+  fill: none;
+}
+
+#spell-points circle {
+  fill: white;
+}
+
+#spells {
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.controls {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.state {
+  padding-bottom: 0.5em;
+}
+
+.spell-stat {
+  padding: 0 1rem;
+  font-size: 14px;
+  border-left: 5px solid transparent;
+}
+.spell-stat:not(:last-child) {
+  padding-bottom: 1rem;
+}
+.spell-stat .spell-preview {
+  stroke: white;
+  stroke-width: 2;
+  fill: none;
+  width: 60px;
+}
+.spell-stat .score {
+  font-size: 1.4em;
+  width: 120px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inline;
+}
+.spell-stat div {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  flex-direction: row;
+}
+.spell-stat.cast {
+  border-left: 5px solid red;
+}
+
+.debug-overlays {
+  pointer-events: none;
+}
+
+.clear-interface .debug-panels,
+.clear-interface .debug-overlays,
+.clear-interface .audio-controls,
+.clear-interface .top-bar,
+.clear-interface .screens {
+  display: none;
+}
+
+.debug-layout .top-bar {
+  outline: solid 2px purple;
+}
+.debug-layout .screens {
+  outline: solid 2px green;
+}
+.debug-layout .screens > *::after {
+  display: grid;
+  align-items: center;
+  justify-content: center;
+  content: "SPACE";
+  background-color: #ff000055;
+  outline: solid 2px red;
+}
+.debug-layout .content {
+  background-color: #0000ff55;
+  outline: solid 2px blue;
+}
+
+.sr-only {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
